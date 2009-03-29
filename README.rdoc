@@ -1,0 +1,20 @@
+= UNRAR
+This is a native ruby library for extracting RAR archives, as created by Rar Labs' WinRAR (http://rarlabs.com).
+
+I would not currently recommend the use of this library in any external project!
+
+== Development Status
+Development is in its early stages, the library currently supports extraction of unencrypted, unspanned, uncompressed files from archives. I realise thats not terribly useful! More will be coming soon! (Essentially the library currently processes the file structure of the archives, rather than the compression part of them)
+
+== Assistance
+I'm new to Ruby programming, if you think you can help me with this software or have any ideas, please get in touch via github:
+
+http://github.com/jphastings/
+
+Your advice will be welcome!
+
+== Wiki
+The github wiki for this project will have my musings on the project, please feel free to contribute:
+
+http://wiki.github.com/jphastings/unrar
+
