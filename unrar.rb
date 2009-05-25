@@ -1,3 +1,15 @@
+# = Unrar
+# A pure ruby implementation of unrar.
+# == Features
+# * Allows you to stream data from archives, even if they're not complete
+# * Cross-Platform
+# * No dependencies
+#
+# == Drawbacks
+# * Doesn't yet support compression
+# * Doesn't yet support encryption (though the frame work is in place - does anybody know the spec?)
+# * Doesn't quite support multi-part archives (nearly there tho!)
+
 class Unrar
   # Flags (in little endian)
   # Archive flags
@@ -23,6 +35,7 @@ class Unrar
   # Attributes
   Attr = [:packed_size,:real_size,:os,:filename]
   
+  # Opens a RAR file and parses the header data
   def initialize(filename)
     @fh = open(File.expand_path(filename),"r")
     @eof = false
@@ -30,6 +43,7 @@ class Unrar
     parse_header
   end
   
+  # Lists the files in this archive
   def list_contents
     @fh.seek(7)
     parse_header # The archive header
@@ -46,11 +60,26 @@ class Unrar
     @files
   end
   
-  def extract(id,offset = 0,amount = nil)
+  # Gets the file id of the filename given in the archive
+  def getid(fname)
     list_contents if @files.nil?
-    raise StandardError, "That file does not exist" if id >= @files.length
-    amount = @files[id][:packed_size] - offset if amount.nil?
-    @fh.seek(@files[id][:datastart] + offset)
+    @files.each_index do |n|
+      if @files[n][:filename] == fname
+        fid = n
+        break
+      end
+    end
+    raise StandardError, "That file does not exist" if (fid >= @files.length) or fid.nil?
+    fid
+  end
+  
+  # Gets you the data from a given file (by file id). Allows you to specify to start from a specific point (so you can access the contained file from any point for streaming) and how many bytes you want extracted
+  def extract(fid,offset = 0,amount = nil)
+    list_contents if @files.nil?
+    fid = getid(fid) if fid.class != Fixnum
+    raise StandardError, "That file does not exist" if fid >= @files.length
+    amount = @files[fid][:packed_size] - offset if amount.nil?
+    @fh.seek(@files[fid][:datastart] + offset)
     @fh.read(amount)
   end
   
@@ -116,7 +145,3 @@ class Unrar
     return details if full
   end
 end
-
-r = Unrar.new("rar/partial.rar")
-p r.list_contents
-puts r.extract(0)
